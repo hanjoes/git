@@ -5,9 +5,11 @@ import Foundation
 /// - Parameters:
 ///   - command: command to execute
 ///   - arguments: arguments passed in
+///   - dir: working directory
 /// - Returns: stdout and stderr
-func execute(command: String, withArguments arguments: [String]) -> (out: String, err: String) {
+func execute(command: String, withArguments arguments: [String], at dir: String = ".") -> (out: String, err: String) {
     let task = Process()
+    task.currentDirectoryPath = dir
     task.launchPath = command
     task.arguments = arguments
     let errPipe = Pipe()
@@ -31,13 +33,15 @@ func execute(command: String, withArguments arguments: [String]) -> (out: String
 /// - Parameters:
 ///   - command: command to execute
 ///   - arguments: arguments
+///   - dir: working directory
 /// - Returns: stdout
 /// - Throws: opFailed when stderr is not empty
 @discardableResult
-func fastFailingExecute(command: String, withArguments arguments: [String]) throws -> String {
-    let (out, err) = execute(command: command, withArguments: arguments)
+func fastFailingExecute(command: String, withArguments arguments: [String], at dir: String = ".") throws -> String {
+    let (out, err) = execute(command: command, withArguments: arguments, at: dir)
     if !err.isEmpty {
-        throw GitError.opFailed
+        fputs(err.cString(using: .utf8), stderr)
+        throw GitError.opFailed(err)
     }
     return out
 }

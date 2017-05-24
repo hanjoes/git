@@ -1,6 +1,6 @@
 
 public enum GitError: Error {
-    case noRepo
-    case opFailed
-    case noRemote
+    case noRepo(String)
+    case opFailed(String)
+    case noRemote(String)
 }

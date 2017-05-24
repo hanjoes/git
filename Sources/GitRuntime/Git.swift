@@ -3,9 +3,12 @@ import Foundation
 /// Simple Git functionalities.
 public struct Git {
     
-    private static let GIT = "git"
+    private static let GIT = "/usr/bin/git"
     
     private let fileManager = FileManager.default
+    
+    public init() {
+    }
     
     /// Synchronize the repository.
     ///
@@ -20,7 +23,6 @@ public struct Git {
         else {
             try cloneRepo(from: repo, at: localFolder, withBranch: branch)
         }
-        
     }
     
     /// Check whether the specified path contains a git repo.
@@ -28,7 +30,7 @@ public struct Git {
     /// - Parameter path: the path to check
     /// - Returns: boolean indicating whether a repo exists
     public func containsRepo(at path: String) -> Bool {
-        let (_, err) = execute(command: Git.GIT, withArguments: ["status"])
+        let (_, err) = execute(command: Git.GIT, withArguments: ["status"], at: path)
         return err.isEmpty
     }
     
@@ -41,13 +43,13 @@ public struct Git {
     /// - Throws: error
     public func updateRepo(at path: String, withBranch branch: String = "master") throws {
         guard containsRepo(at: path) else {
-            throw GitError.noRepo
+            throw GitError.noRepo("Cannot find repository at: \(path) for branch: \(branch)")
         }
         
         // update the specified branch
         let remotes = try findRemotes(at: path)
         guard remotes.count > 0 else {
-            throw GitError.noRemote
+            throw GitError.noRemote("0 remote found at path: \(path)")
         }
         
         try fastFailingExecute(command: Git.GIT, withArguments: ["pull", remotes[0], branch])
@@ -61,7 +63,7 @@ public struct Git {
     ///   - branch: branch to checkout, default to master
     /// - Throws: error
     public func cloneRepo(from repo: String, at path: String, withBranch branch: String = "master") throws {
-        try fastFailingExecute(command: Git.GIT, withArguments: ["clone", "-b \(branch)", repo, path])
+        try fastFailingExecute(command: Git.GIT, withArguments: ["clone", repo, path], at: path)
     }
 
     /// Find all remotes in the repository
@@ -71,10 +73,10 @@ public struct Git {
     /// - Throws: error
     public func findRemotes(at path: String) throws -> [String] {
         guard containsRepo(at: path) else {
-            throw GitError.noRepo
+            throw GitError.noRepo("Cannot find repository at: \(path)")
         }
         
-        let out = try fastFailingExecute(command: Git.GIT, withArguments: ["remote"])
+        let out = try fastFailingExecute(command: Git.GIT, withArguments: ["remote"], at: path)
         return out.components(separatedBy: "\n").filter { !$0.isEmpty }
     }
 }
