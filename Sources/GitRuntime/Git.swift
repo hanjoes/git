@@ -30,8 +30,8 @@ public struct Git {
     /// - Parameter path: the path to check
     /// - Returns: boolean indicating whether a repo exists
     public func containsRepo(at path: String) -> Bool {
-        let (reason, _, _) = execute(command: Git.GIT, withArguments: ["status"], at: path)
-        return reason == .exit
+        let (status, _, _) = execute(command: Git.GIT, withArguments: ["status"], at: path)
+        return status == 0
     }
     
     /// Update the git repo at path.

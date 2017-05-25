@@ -7,7 +7,7 @@ import Foundation
 ///   - arguments: arguments passed in
 ///   - dir: working directory
 /// - Returns: stdout and stderr
-func execute(command: String, withArguments arguments: [String], at dir: String = ".") -> (reason: Process.TerminationReason, out: String, err: String) {
+func execute(command: String, withArguments arguments: [String], at dir: String = ".") -> (status: Int32, out: String, err: String) {
     let task = Process()
     task.currentDirectoryPath = dir
     task.launchPath = command
@@ -25,7 +25,7 @@ func execute(command: String, withArguments arguments: [String], at dir: String 
     
     let outStr = String(data: out, encoding: .utf8) ?? ""
     let errStr = String(data: err, encoding: .utf8) ?? ""
-    return (task.terminationReason, outStr, errStr)
+    return (task.terminationStatus, outStr, errStr)
 }
 
 /// Fail fast execution of command
@@ -38,8 +38,8 @@ func execute(command: String, withArguments arguments: [String], at dir: String 
 /// - Throws: opFailed when stderr is not empty
 @discardableResult
 func fastFailingExecute(command: String, withArguments arguments: [String], at dir: String = ".") throws -> (out: String, err: String) {
-    let (reason, out, err) = execute(command: command, withArguments: arguments, at: dir)
-    if !(reason == .exit) {
+    let (status, out, err) = execute(command: command, withArguments: arguments, at: dir)
+    if !(status == 0) {
         fputs(err.cString(using: .utf8), stderr)
         throw GitError.opFailed(err)
     }
