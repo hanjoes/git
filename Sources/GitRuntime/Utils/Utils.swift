@@ -37,11 +37,11 @@ func execute(command: String, withArguments arguments: [String], at dir: String 
 /// - Returns: stdout
 /// - Throws: opFailed when stderr is not empty
 @discardableResult
-func fastFailingExecute(command: String, withArguments arguments: [String], at dir: String = ".") throws -> String {
+func fastFailingExecute(command: String, withArguments arguments: [String], at dir: String = ".") throws -> (out: String, err: String) {
     let (reason, out, err) = execute(command: command, withArguments: arguments, at: dir)
     if !(reason == .exit) {
         fputs(err.cString(using: .utf8), stderr)
         throw GitError.opFailed(err)
     }
-    return out
+    return (out, err)
 }

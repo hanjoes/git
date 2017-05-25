@@ -76,7 +76,7 @@ public struct Git {
             throw GitError.noRepo("Cannot find repository at: \(path)")
         }
         
-        let out = try fastFailingExecute(command: Git.GIT, withArguments: ["remote"], at: path)
+        let (out, _) = try fastFailingExecute(command: Git.GIT, withArguments: ["remote"], at: path)
         return out.components(separatedBy: "\n").filter { !$0.isEmpty }
     }
 }
