@@ -52,7 +52,7 @@ public struct Git {
             throw GitError.noRemote("0 remote found at path: \(path)")
         }
         
-        try fastFailingExecute(command: Git.GIT, withArguments: ["pull", remotes[0], branch])
+        try fastFailingExecute(command: Git.GIT, withArguments: ["-C", path, "pull", remotes[0], branch])
     }
     
     /// Clones a user specified repository to folder
