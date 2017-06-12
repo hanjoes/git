@@ -17,8 +17,8 @@ public struct Git {
     ///   - localFolder: local folder
     /// - Throws: error
     public func sync(from repo: String, to localFolder: String, withBranch branch: String = "master") throws {
-        if containsRepo(at: repo) {
-            try updateRepo(at: repo, withBranch: branch)
+        if containsRepo(at: localFolder) {
+            try updateRepo(at: localFolder, withBranch: branch)
         }
         else {
             try cloneRepo(from: repo, at: localFolder, withBranch: branch)
