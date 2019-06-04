@@ -1,11 +1,26 @@
-// swift-tools-version:3.1
+// swift-tools-version:5.0
 
 import PackageDescription
 
 let package = Package(
-    name: "git",
+    name: "SwiftGit",
+    products: [
+        .library(
+            name: "SwiftGitLib",
+            targets: ["SwiftGitLib"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/hanjoes/swift-pawn", from: "0.2.0")
+    ],
     targets: [
-        Target(name: "GitExec", dependencies: ["GitRuntime"]),
-        Target(name: "GitRuntime", dependencies: [])
+        .target(
+            name: "SwiftGit", 
+            dependencies: ["SwiftGitLib"]),
+        .target(
+            name: "SwiftGitLib", 
+            dependencies: ["SwiftPawn"]),
+        .testTarget(
+            name: "SwiftGitLibTests",
+            dependencies: ["SwiftGitLib"]),
     ]
 )
