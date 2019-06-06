@@ -1,4 +1,5 @@
 @testable import SwiftGitLib
+@testable import SwiftPawn
 import XCTest
 #if os(Linux)
     import Glibc
@@ -39,6 +40,37 @@ class GitRuntimeTests: XCTestCase {
         let remotes = try Git.findRemotes(at: currentTemp)
         XCTAssertGreaterThanOrEqual(1, remotes.count)
         XCTAssertEqual("origin", remotes.first!)
+    }
+    
+    func testInitialize() throws {
+        let currentTemp = try makeTempDirectory()
+        try Git.initialize(inDir: currentTemp)
+    }
+    
+    func testCommit() throws {
+        let currentTemp = try makeTempDirectory()
+        try run(inTmpDir: currentTemp) {
+            try Git.initialize(inDir: currentTemp)
+            _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
+            try Git.add(path: "./abc")
+            try Git.commit(withMessage: "test")
+        }
+    }
+    
+    func testIsModified() throws {
+        let currentTemp = try makeTempDirectory()
+        try run(inTmpDir: currentTemp) {
+            try Git.initialize(inDir: currentTemp)
+            print(currentTemp)
+            _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
+            try Git.add(path: "./abc")
+            try Git.commit(withMessage: "test")
+            let fd = fopen("./abc", "w")
+            defer { fclose(fd) }
+            fwrite("test", 1, 4, fd)
+            fflush(fd)
+            XCTAssertTrue(try Git.isModified(currentTemp))
+        }
     }
 
     private func makeTempDirectory() throws -> String {

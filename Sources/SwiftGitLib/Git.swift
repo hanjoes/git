@@ -1,8 +1,16 @@
 import SwiftPawn
+import Darwin
 
 /// Simple Git functionalities.
 public struct Git {
     private static let GIT = "git"
+    
+    private static let BufferSize = 4096
+    
+    private static var cwd: String {
+        var buffer = [Int8](repeating: 0, count: BufferSize)
+        return String(cString: getcwd(&buffer, BufferSize))
+    }
 
     public init() {}
 
@@ -75,5 +83,37 @@ public struct Git {
 
         let (_, out, _) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "remote"])
         return out.split(separator: "\n").filter { !$0.isEmpty }.map { String($0) }
+    }
+    
+    public static func initialize(inDir dir: String) throws {
+        _ = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "init", dir])
+    }
+    
+    public static func commit(withMessage msg: String) throws {
+        guard containsRepo(at: cwd) else {
+            throw GitError.noRepo("Cannot find repository at: \(cwd)")
+        }
+        
+        let (status, _, err) = try SwiftPawn.execute(command: Git.GIT,
+                                                     arguments: ["git", "commit", "-m", "\"\(msg)\""])
+        if status != 0 {
+            throw GitError.opFailed("Commit failed with message: \n\(err)")
+        }
+    }
+    
+    public static func add(path: String) throws {
+        let (status, _, err) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "add", path])
+        if status != 0 {
+            throw GitError.opFailed("Staging \(path) failed with message: \n\(err)")
+        }
+    }
+    
+    public static func isModified(_ path: String) throws -> Bool {
+        guard containsRepo(at: path) else {
+            throw GitError.noRepo("Cannot find repository at: \(path)")
+        }
+        
+        let (_, out, _) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "status", "--porcelain"])
+        return out.split(separator: "\n").filter { $0.split(separator: " ")[0].contains("M") }.count > 0
     }
 }
