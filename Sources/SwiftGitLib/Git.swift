@@ -21,18 +21,18 @@ public struct Git {
     ///   - localFolder: local folder
     /// - Throws: error
     public static func sync(from repo: String, to localFolder: String, withBranch branch: String = "master") throws {
-        if containsRepo(at: localFolder) {
+        if isRepo(at: localFolder) {
             try updateRepo(at: localFolder, withBranch: branch)
         } else {
             try cloneRepo(from: repo, at: localFolder, withBranch: branch)
         }
     }
 
-    /// Check whether the specified path contains a git repo.
+    /// Check whether the specified path is a git repository.
     ///
     /// - Parameter path: the path to check
     /// - Returns: boolean indicating whether a repo exists
-    public static func containsRepo(at _: String) -> Bool {
+    public static func isRepo(at _: String) -> Bool {
         guard let (status, _, _) = try? SwiftPawn.execute(command: Git.GIT, arguments: ["git", "status"]) else {
             return false
         }
@@ -47,7 +47,7 @@ public struct Git {
     ///   - branch: branch name
     /// - Throws: error
     public static func updateRepo(at path: String, withBranch branch: String = "master") throws {
-        guard containsRepo(at: path) else {
+        guard isRepo(at: path) else {
             throw GitError.noRepo("Cannot find repository at: \(path) for branch: \(branch)")
         }
 
@@ -77,7 +77,7 @@ public struct Git {
     /// - Returns: a list of remote names
     /// - Throws: error
     public static func findRemotes(at path: String) throws -> [String] {
-        guard containsRepo(at: path) else {
+        guard isRepo(at: path) else {
             throw GitError.noRepo("Cannot find repository at: \(path)")
         }
 
@@ -90,7 +90,7 @@ public struct Git {
     }
     
     public static func commit(withMessage msg: String) throws {
-        guard containsRepo(at: cwd) else {
+        guard isRepo(at: cwd) else {
             throw GitError.noRepo("Cannot find repository at: \(cwd)")
         }
         
@@ -109,11 +109,46 @@ public struct Git {
     }
     
     public static func isModified(_ path: String) throws -> Bool {
-        guard containsRepo(at: path) else {
+        guard isRepo(at: path) else {
             throw GitError.noRepo("Cannot find repository at: \(path)")
         }
         
         let (_, out, _) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "status", "--porcelain"])
         return out.split(separator: "\n").filter { $0.split(separator: " ")[0].contains("M") }.count > 0
+    }
+    
+    public static func branchName() throws -> String? {
+        guard isRepo(at: cwd) else {
+            return nil
+        }
+        
+        let (_, out, _) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "symbolic-ref", "HEAD"])
+        guard out.starts(with: "refs/heads") else {
+            return nil
+        }
+        
+        let elements = out.trimmed().split(separator: "/")
+        guard elements.count == 3 else {
+            return nil
+        }
+        
+        return String(elements[2])
+    }
+}
+
+// MARK: -
+
+private extension String {
+    func trimmed() -> String {
+        var result = self
+        while result.last?.isWhitespace == true {
+            result = String(result.dropLast())
+        }
+        
+        while result.first?.isWhitespace == true {
+            result = String(result.dropFirst())
+        }
+        
+        return result
     }
 }

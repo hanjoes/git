@@ -17,13 +17,13 @@ class GitRuntimeTests: XCTestCase {
         } catch {
             print(error)
         }
-        XCTAssertTrue(Git.containsRepo(at: currentTemp))
+        XCTAssertTrue(Git.isRepo(at: currentTemp))
     }
 
-    func testContainsRepo() throws {
+    func testisRepo() throws {
         let currentTemp = try makeTempDirectory()
         try run(inTmpDir: currentTemp) {
-            XCTAssertFalse(Git.containsRepo(at: currentTemp))
+            XCTAssertFalse(Git.isRepo(at: currentTemp))
         }
     }
 
@@ -61,7 +61,6 @@ class GitRuntimeTests: XCTestCase {
         let currentTemp = try makeTempDirectory()
         try run(inTmpDir: currentTemp) {
             try Git.initialize(inDir: currentTemp)
-            print(currentTemp)
             _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
             try Git.add(path: "./abc")
             try Git.commit(withMessage: "test")
@@ -70,6 +69,17 @@ class GitRuntimeTests: XCTestCase {
             fwrite("test", 1, 4, fd)
             fflush(fd)
             XCTAssertTrue(try Git.isModified(currentTemp))
+        }
+    }
+    
+    
+    func testBranchName() throws {
+        let currentTemp = try makeTempDirectory()
+        try run(inTmpDir: currentTemp) {
+            try Git.initialize(inDir: currentTemp)
+            _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
+            let name = try Git.branchName()
+            XCTAssertEqual("master", name!)
         }
     }
 
