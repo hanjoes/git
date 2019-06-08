@@ -3,7 +3,6 @@ import Darwin
 
 /// Simple Git functionalities.
 public struct Git {
-    private static let GIT = "git"
     
     private static let BufferSize = 4096
     
@@ -33,7 +32,7 @@ public struct Git {
     /// - Parameter path: the path to check
     /// - Returns: boolean indicating whether a repo exists
     public static func isRepo(at _: String) -> Bool {
-        guard let (status, _, _) = try? SwiftPawn.execute(command: Git.GIT, arguments: ["git", "status"]) else {
+        guard let (status, _, _) = try? SwiftPawn.execute(command: "git", arguments: ["git", "status"]) else {
             return false
         }
         return status == 0
@@ -57,7 +56,7 @@ public struct Git {
             throw GitError.noRemote("0 remote found at path: \(path)")
         }
 
-        _ = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "-C", path, "pull", remotes[0], branch])
+        _ = try SwiftPawn.execute(command: "git", arguments: ["git", "-C", path, "pull", remotes[0], branch])
     }
 
     /// Clones a user specified repository to folder
@@ -68,7 +67,7 @@ public struct Git {
     ///   - branch: branch to checkout, default to master
     /// - Throws: error
     public static func cloneRepo(from repo: String, at path: String, withBranch _: String = "master") throws {
-        _ = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "clone", repo, path])
+        _ = try SwiftPawn.execute(command: "git", arguments: ["git", "clone", repo, path])
     }
 
     /// Find all remotes in the repository
@@ -81,12 +80,12 @@ public struct Git {
             throw GitError.noRepo("Cannot find repository at: \(path)")
         }
 
-        let (_, out, _) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "remote"])
+        let (_, out, _) = try SwiftPawn.execute(command: "git", arguments: ["git", "remote"])
         return out.split(separator: "\n").filter { !$0.isEmpty }.map { String($0) }
     }
     
     public static func initialize(inDir dir: String) throws {
-        _ = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "init", dir])
+        _ = try SwiftPawn.execute(command: "git", arguments: ["git", "init", dir])
     }
     
     public static func commit(withMessage msg: String) throws {
@@ -94,7 +93,7 @@ public struct Git {
             throw GitError.noRepo("Cannot find repository at: \(cwd)")
         }
         
-        let (status, _, err) = try SwiftPawn.execute(command: Git.GIT,
+        let (status, _, err) = try SwiftPawn.execute(command: "git",
                                                      arguments: ["git", "commit", "-m", "\"\(msg)\""])
         if status != 0 {
             throw GitError.opFailed("Commit failed with message: \n\(err)")
@@ -102,7 +101,7 @@ public struct Git {
     }
     
     public static func add(path: String) throws {
-        let (status, _, err) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "add", path])
+        let (status, _, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "add", path])
         if status != 0 {
             throw GitError.opFailed("Staging \(path) failed with message: \n\(err)")
         }
@@ -113,7 +112,7 @@ public struct Git {
             throw GitError.noRepo("Cannot find repository at: \(path)")
         }
         
-        let (_, out, _) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "status", "--porcelain"])
+        let (_, out, _) = try SwiftPawn.execute(command: "git", arguments: ["git", "status", "--porcelain"])
         return out.split(separator: "\n").filter { $0.split(separator: " ")[0].contains("M") }.count > 0
     }
     
@@ -122,7 +121,7 @@ public struct Git {
             return nil
         }
         
-        let (_, out, _) = try SwiftPawn.execute(command: Git.GIT, arguments: ["git", "symbolic-ref", "HEAD"])
+        let (_, out, _) = try SwiftPawn.execute(command: "git", arguments: ["git", "symbolic-ref", "HEAD"])
         guard out.starts(with: "refs/heads") else {
             return nil
         }

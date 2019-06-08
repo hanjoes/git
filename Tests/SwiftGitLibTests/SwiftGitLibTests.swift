@@ -7,13 +7,16 @@ import XCTest
     import Darwin
 #endif
 
+private struct TC {
+    static let TestRepo = "https://github.com/hanjoes/git.git"
+}
+
 class GitRuntimeTests: XCTestCase {
-    private let testRepo = "https://github.com/hanjoes/git.git"
 
     func testCloneRepo() throws {
         let currentTemp = try makeTempDirectory()
         do {
-            try Git.cloneRepo(from: testRepo, at: currentTemp)
+            try Git.cloneRepo(from: TC.TestRepo, at: currentTemp)
         } catch {
             print(error)
         }
@@ -36,7 +39,7 @@ class GitRuntimeTests: XCTestCase {
 
     func testFindRemote() throws {
         let currentTemp = try makeTempDirectory()
-        try Git.cloneRepo(from: testRepo, at: currentTemp)
+        try Git.cloneRepo(from: TC.TestRepo, at: currentTemp)
         let remotes = try Git.findRemotes(at: currentTemp)
         XCTAssertGreaterThanOrEqual(1, remotes.count)
         XCTAssertEqual("origin", remotes.first!)
@@ -75,10 +78,10 @@ class GitRuntimeTests: XCTestCase {
     func testCompare() throws {
         let currentTemp = try makeTempDirectory()
         try run(inTmpDir: currentTemp) {
-            try Git.cloneRepo(from: testRepo, at: currentTemp)
+            try Git.cloneRepo(from: TC.TestRepo, at: currentTemp)
             XCTAssertEqual(-4, try Git.compare("50685d9342139e", "8925e720d508cca3"))
             XCTAssertEqual(1, try Git.compare("ef0421b", "f1749a1"))
-            XCTAssertEqual(3, try Git.compare("origin/noremove", "b589c3d"))
+            XCTAssertEqual(2, try Git.compare("origin/noremove", "b589c3d"))
         }
     }
     
