@@ -146,9 +146,9 @@ public struct Git {
     /// - Throws: execution error, or either of the parameter is not a valid commit
     public static func compare(_ lhs: String, _ rhs: String) throws -> Int {
         var (status, out, err) = try SwiftPawn.execute(command: "git",
-                                                       arguments: ["git", "rev-list", "\(lhs)..\(rhs)"])
+                                                       arguments: ["git", "rev-list", "\(rhs)..\(lhs)"])
         guard status == 0 else {
-            throw GitError.opFailed("git rev-list \(lhs)..\(rhs) failed due to: \(err)")
+            throw GitError.opFailed("git rev-list \(rhs)..\(lhs) failed due to: \(err)")
         }
         
         let l2r = out.trimmed().split(separator: "\n").count
@@ -157,9 +157,9 @@ public struct Git {
         }
         
         (status, out, err) = try SwiftPawn.execute(command: "git",
-                                                   arguments: ["git", "rev-list", "\(rhs)..\(lhs)"])
+                                                   arguments: ["git", "rev-list", "\(lhs)..\(rhs)"])
         guard status == 0 else {
-            throw GitError.opFailed("git rev-list \(rhs)..\(lhs) failed due to: \(err)")
+            throw GitError.opFailed("git rev-list \(lhs)..\(rhs) failed due to: \(err)")
         }
         
         let r2l = out.trimmed().split(separator: "\n").count

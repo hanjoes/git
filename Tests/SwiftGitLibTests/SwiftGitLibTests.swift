@@ -72,6 +72,16 @@ class GitRuntimeTests: XCTestCase {
         }
     }
     
+    func testCompare() throws {
+        let currentTemp = try makeTempDirectory()
+        try run(inTmpDir: currentTemp) {
+            try Git.cloneRepo(from: testRepo, at: currentTemp)
+            XCTAssertEqual(-4, try Git.compare("50685d9342139e", "8925e720d508cca3"))
+            XCTAssertEqual(1, try Git.compare("ef0421b", "f1749a1"))
+            XCTAssertEqual(3, try Git.compare("origin/noremove", "b589c3d"))
+        }
+    }
+    
     
     func testBranchName() throws {
         let currentTemp = try makeTempDirectory()
