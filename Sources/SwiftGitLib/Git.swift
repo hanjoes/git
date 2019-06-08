@@ -31,7 +31,11 @@ public struct Git {
     ///
     /// - Parameter path: the path to check
     /// - Returns: boolean indicating whether a repo exists
-    public static func isRepo(at _: String) -> Bool {
+    public static func isRepo(at path: String) -> Bool {
+        var buffer = [Int8](repeating: 0, count: BufferSize)
+        let cwd = String(cString: getcwd(&buffer, BufferSize))
+        chdir(path)
+        defer { chdir(cwd) }
         guard let (status, _, _) = try? SwiftPawn.execute(command: "git", arguments: ["git", "status"]) else {
             return false
         }
