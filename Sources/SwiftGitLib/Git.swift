@@ -134,6 +134,40 @@ public struct Git {
         
         return String(elements[2])
     }
+
+    /// Compare two commits and find out the difference.
+    ///
+    /// When comparing labels, only local branch name is supported.
+    ///
+    /// - Parameters:
+    ///   - lhs: the label/hash indicating one commit that's ahead
+    ///   - rhs: the label/hash indicating one commit that's behind
+    /// - Returns: value indicate how many conmmits _lhs_ is ahead of _rhs_ (can be negative).
+    /// - Throws: execution error, or either of the parameter is not a valid commit
+    public static func compare(_ lhs: String, _ rhs: String) throws -> Int {
+        var (status, out, err) = try SwiftPawn.execute(command: "git",
+                                                       arguments: ["git", "rev-list", "\(lhs)..\(rhs)"])
+        guard status == 0 else {
+            throw GitError.opFailed("git rev-list \(lhs)..\(rhs) failed due to: \(err)")
+        }
+        
+        let l2r = out.trimmed().split(separator: "\n").count
+        if l2r > 0 {
+            return l2r
+        }
+        
+        (status, out, err) = try SwiftPawn.execute(command: "git",
+                                                   arguments: ["git", "rev-list", "\(rhs)..\(lhs)"])
+        guard status == 0 else {
+            throw GitError.opFailed("git rev-list \(rhs)..\(lhs) failed due to: \(err)")
+        }
+        
+        let r2l = out.trimmed().split(separator: "\n").count
+        if r2l > 0 {
+            return -r2l
+        }
+        return r2l
+    }
 }
 
 // MARK: -
