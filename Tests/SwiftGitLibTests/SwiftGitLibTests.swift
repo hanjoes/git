@@ -23,18 +23,15 @@ class GitRuntimeTests: XCTestCase {
         XCTAssertTrue(Git.isRepo(at: currentTemp))
     }
 
-    func testisRepo() throws {
+    func testIsRepo() throws {
         let currentTemp = try makeTempDirectory()
-        try run(inTmpDir: currentTemp) {
-            XCTAssertFalse(Git.isRepo(at: currentTemp))
-        }
+        try Git.cloneRepo(from: TC.TestRepo, at: currentTemp)
+        XCTAssertTrue(Git.isRepo(at: currentTemp))
     }
 
     func testFindRemoteButNoRepo() throws {
         let currentTemp = try makeTempDirectory()
-        try run(inTmpDir: currentTemp) {
-            XCTAssertThrowsError(try Git.findRemotes(at: currentTemp))
-        }
+        XCTAssertThrowsError(try Git.findRemotes(at: currentTemp))
     }
 
     func testFindRemote() throws {
@@ -44,56 +41,51 @@ class GitRuntimeTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(1, remotes.count)
         XCTAssertEqual("origin", remotes.first!)
     }
-    
+
     func testInitialize() throws {
         let currentTemp = try makeTempDirectory()
         try Git.initialize(inDir: currentTemp)
     }
-    
+
     func testCommit() throws {
         let currentTemp = try makeTempDirectory()
-        try run(inTmpDir: currentTemp) {
-            try Git.initialize(inDir: currentTemp)
-            _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
-            try Git.add(path: "./abc")
-            try Git.commit(withMessage: "test")
-        }
+        try Git.initialize(inDir: currentTemp)
+        chdir(currentTemp)
+        _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
+        try Git.add("./abc", at: currentTemp)
+        try Git.commit(at: currentTemp, withMessage: "test")
     }
-    
+
+
     func testIsModified() throws {
         let currentTemp = try makeTempDirectory()
-        try run(inTmpDir: currentTemp) {
-            try Git.initialize(inDir: currentTemp)
-            _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
-            try Git.add(path: "./abc")
-            try Git.commit(withMessage: "test")
-            let fd = fopen("./abc", "w")
-            defer { fclose(fd) }
-            fwrite("test", 1, 4, fd)
-            fflush(fd)
-            XCTAssertTrue(try Git.isModified(currentTemp))
-        }
+        try Git.initialize(inDir: currentTemp)
+        chdir(currentTemp)
+        _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
+        try Git.add("./abc", at: currentTemp)
+        try Git.commit(at: currentTemp, withMessage: "test")
+        let fd = fopen("./abc", "w")
+        defer { fclose(fd) }
+        fwrite("test", 1, 4, fd)
+        fflush(fd)
+        XCTAssertTrue(try Git.isModified(at: currentTemp))
     }
-    
+
     func testCompare() throws {
         let currentTemp = try makeTempDirectory()
-        try run(inTmpDir: currentTemp) {
-            try Git.cloneRepo(from: TC.TestRepo, at: currentTemp)
-            XCTAssertEqual(-4, try Git.compare("50685d9342139e", "8925e720d508cca3"))
-            XCTAssertEqual(1, try Git.compare("ef0421b", "f1749a1"))
-            XCTAssertEqual(2, try Git.compare("origin/noremove", "b589c3d"))
-        }
+        try Git.cloneRepo(from: TC.TestRepo, at: currentTemp)
+        XCTAssertEqual(-4, try Git.compare("50685d9342139e", "8925e720d508cca3", at: currentTemp))
+        XCTAssertEqual(1, try Git.compare("ef0421b", "f1749a1", at: currentTemp))
+        XCTAssertEqual(2, try Git.compare("origin/noremove", "b589c3d", at: currentTemp))
     }
-    
-    
+
+
     func testBranchName() throws {
         let currentTemp = try makeTempDirectory()
-        try run(inTmpDir: currentTemp) {
-            try Git.initialize(inDir: currentTemp)
-            _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
-            let name = try Git.branchName()
-            XCTAssertEqual("master", name!)
-        }
+        try Git.initialize(inDir: currentTemp)
+        _ = try SwiftPawn.execute(command: "touch", arguments: ["touch", "abc"])
+        let name = try Git.branchName(at: currentTemp)
+        XCTAssertEqual("master", name!)
     }
 
     private func makeTempDirectory() throws -> String {
@@ -101,13 +93,5 @@ class GitRuntimeTests: XCTestCase {
         let tempDirectoryPath = "/tmp/GitRuntimeTests-\(g.next())/"
         mkdir(tempDirectoryPath, S_IRWXU)
         return tempDirectoryPath
-    }
-
-    private func run(inTmpDir dir: String, f: () throws -> Void) throws {
-        var buffer = [Int8](repeating: 0, count: 1024)
-        let cwd = String(cString: getcwd(&buffer, 1024))
-        chdir(dir)
-        try f()
-        chdir(cwd)
     }
 }
