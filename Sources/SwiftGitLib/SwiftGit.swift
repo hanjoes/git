@@ -47,6 +47,14 @@ public struct SwiftGit {
         }
     }
 
+    public static func fetchRepo(at path: String) throws {
+        let (status, _, err) = try SwiftPawn.execute(command: "git",
+                                                     arguments: ["git", "fetch", "--all"])
+        if status != 0 {
+            throw SwiftGitError.opFailed("Commit failed with message: \n\(err)")
+        }
+    }
+
     /// Clones a user specified repository to folder
     ///
     /// - Parameters:
