@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "SwiftPawn",
+        "repositoryURL": "https://github.com/hanjoes/swift-pawn",
+        "state": {
+          "branch": null,
+          "revision": "873858b96dee1d8d9442171efdc25d3ee3d953c1",
+          "version": "0.3.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

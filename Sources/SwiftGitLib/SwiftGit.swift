@@ -2,7 +2,7 @@ import SwiftPawn
 import Darwin
 
 /// Simple Git functionalities.
-public struct Git {
+public struct SwiftGit {
     
     private static let BufferSize = 4096
     
@@ -37,13 +37,13 @@ public struct Git {
         // update the specified branch
         let remotes = try findRemotes(at: path)
         guard remotes.count > 0 else {
-            throw GitError.noRemote("0 remote found at path: \(path)")
+            throw SwiftGitError.noRemote("0 remote found at path: \(path)")
         }
 
         let (status, _, err) = try SwiftPawn.execute(command: "git",
                                                      arguments: ["git", "-C", path, "pull", remotes[0], branch])
         if status != 0 {
-            throw GitError.opFailed("Commit failed with message: \n\(err)")
+            throw SwiftGitError.opFailed("Commit failed with message: \n\(err)")
         }
     }
 
@@ -67,7 +67,7 @@ public struct Git {
         return try run(inDir: path) {
             let (status, out, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "remote"])
             if status != 0 {
-                throw GitError.opFailed("Commit failed with message: \n\(err)")
+                throw SwiftGitError.opFailed("Commit failed with message: \n\(err)")
             }
             return out.split(separator: "\n").filter { !$0.isEmpty }.map { String($0) }
         }
@@ -82,7 +82,7 @@ public struct Git {
             let (status, _, err) = try SwiftPawn.execute(command: "git",
                                                          arguments: ["git", "commit", "-m", "\"\(msg)\""])
             if status != 0 {
-                throw GitError.opFailed("Commit failed with message: \n\(err)")
+                throw SwiftGitError.opFailed("Commit failed with message: \n\(err)")
             }
         }
     }
@@ -91,7 +91,7 @@ public struct Git {
         try run(inDir: path) {
             let (status, _, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "add", path])
             if status != 0 {
-                throw GitError.opFailed("Staging \(path) failed with message: \n\(err)")
+                throw SwiftGitError.opFailed("Staging \(path) failed with message: \n\(err)")
             }
         }
     }
@@ -100,7 +100,7 @@ public struct Git {
         return try run(inDir: path) {
             let (status, out, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "status", "--porcelain"])
             if status != 0 {
-                throw GitError.opFailed("Staging \(path) failed with message: \n\(err)")
+                throw SwiftGitError.opFailed("Staging \(path) failed with message: \n\(err)")
             }
             return out.split(separator: "\n").filter { $0.split(separator: " ")[0].contains("M") }.count > 0
         }
@@ -111,7 +111,7 @@ public struct Git {
         return try run(inDir: path) {
             let (status, out, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "symbolic-ref", "HEAD"])
             if status != 0 {
-                throw GitError.opFailed("Staging \(path) failed with message: \n\(err)")
+                throw SwiftGitError.opFailed("Staging \(path) failed with message: \n\(err)")
             }
             
             guard out.starts(with: "refs/heads") else {
@@ -142,7 +142,7 @@ public struct Git {
             var (status, out, err) = try SwiftPawn.execute(command: "git",
                                                            arguments: ["git", "rev-list", "\(rhs)..\(lhs)"])
             guard status == 0 else {
-                throw GitError.opFailed("git rev-list \(rhs)..\(lhs) failed due to: \(err)")
+                throw SwiftGitError.opFailed("git rev-list \(rhs)..\(lhs) failed due to: \(err)")
             }
             
             let l2r = out.trimmed().split(separator: "\n").count
@@ -153,7 +153,7 @@ public struct Git {
             (status, out, err) = try SwiftPawn.execute(command: "git",
                                                        arguments: ["git", "rev-list", "\(lhs)..\(rhs)"])
             guard status == 0 else {
-                throw GitError.opFailed("git rev-list \(lhs)..\(rhs) failed due to: \(err)")
+                throw SwiftGitError.opFailed("git rev-list \(lhs)..\(rhs) failed due to: \(err)")
             }
             
             let r2l = out.trimmed().split(separator: "\n").count

@@ -14,9 +14,6 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "SwiftGit", 
-            dependencies: ["SwiftGitLib"]),
-        .target(
             name: "SwiftGitLib", 
             dependencies: ["SwiftPawn"]),
         .testTarget(
