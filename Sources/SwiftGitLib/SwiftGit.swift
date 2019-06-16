@@ -17,10 +17,6 @@ public struct SwiftGit {
 
   public init() {}
 
-  /// Check whether the specified path is a git repository.
-  ///
-  /// - Parameter path: the path to check
-  /// - Returns: boolean indicating whether a repo exists
   public static func isRepo(at path: String) -> Bool {
     return run(inDir: path) {
       guard let (status, _, _) = try? SwiftPawn.execute(command: "git",
@@ -33,13 +29,6 @@ public struct SwiftGit {
     }
   }
 
-  /// Update the git repo at path.
-  /// This will update the first found remote.
-  ///
-  /// - Parameters:
-  ///   - path: path to the repo we want to update
-  ///   - branch: branch name
-  /// - Throws: error
   public static func updateRepo(at path: String,
                                 withBranch branch: String = "master") throws {
     // update the specified branch
@@ -93,24 +82,12 @@ public struct SwiftGit {
     }
   }
 
-  /// Clones a user specified repository to folder
-  ///
-  /// - Parameters:
-  ///   - repo: url to repository
-  ///   - path: local folder to hold the repository
-  ///   - branch: branch to checkout, default to master
-  /// - Throws: error
   public static func cloneRepo(from repo: String, at path: String,
                                withBranch _: String = "master") throws {
     _ = try SwiftPawn.execute(command: "git",
                               arguments: ["git", "clone", repo, path])
   }
 
-  /// Find all remotes in the repository
-  ///
-  /// - Parameter path: path where repository resides
-  /// - Returns: a list of remote names
-  /// - Throws: error
   public static func findRemotes(at path: String) throws -> [String] {
     return try run(inDir: path) {
       let (status, out, err) = try SwiftPawn.execute(command: "git",
@@ -193,16 +170,6 @@ public struct SwiftGit {
     }
   }
 
-  /// Compare two commits and find out the difference.
-  ///
-  /// When comparing labels, only local branch name is supported.
-  ///
-  /// - Parameters:
-  ///   - lhs: the label/hash indicating one commit that's ahead
-  ///   - rhs: the label/hash indicating one commit that's behind
-  ///   - path: directory where should be a git repository
-  /// - Returns: value indicate how many conmmits _lhs_ is ahead of _rhs_
-  /// - Throws: execution error
   public static func compare(_ lhs: String, _ rhs: String,
                              at path: String) throws -> Int {
     return try run(inDir: path) {
