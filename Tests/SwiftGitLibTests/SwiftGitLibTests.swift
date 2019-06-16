@@ -84,6 +84,15 @@ class SwiftGitLibTests: XCTestCase {
     XCTAssertEqual("master", name!)
   }
 
+  func testFindTrackingRemote() throws {
+    let currentTemp = try makeTempDirectory()
+    try SwiftGit.cloneRepo(from: TC.TestRepo, at: currentTemp)
+    let track = SwiftGit.findTrackingRemote(at: currentTemp, branch: "master")
+    XCTAssertTrue(track!.contains("/master"))
+    let untracked = SwiftGit.findTrackingRemote(at: currentTemp, branch: "dev")
+    XCTAssertNil(untracked)
+  }
+
   private func makeTempDirectory() throws -> String {
     var g = SystemRandomNumberGenerator()
     let tempDirectoryPath = "/tmp/GitRuntimeTests-\(g.next())/"
@@ -103,4 +112,3 @@ class SwiftGitLibTests: XCTestCase {
     ("testBranchName", testBranchName),
   ]
 }
-

@@ -23,7 +23,10 @@ public struct SwiftGit {
   /// - Returns: boolean indicating whether a repo exists
   public static func isRepo(at path: String) -> Bool {
     return run(inDir: path) {
-      guard let (status, _, _) = try? SwiftPawn.execute(command: "git", arguments: ["git", "status"]) else {
+      guard let (status, _, _) = try? SwiftPawn.execute(command: "git",
+                                                        arguments:
+                                                        ["git",
+                                                         "status"]) else {
         return false
       }
       return (status == 0)
@@ -37,7 +40,8 @@ public struct SwiftGit {
   ///   - path: path to the repo we want to update
   ///   - branch: branch name
   /// - Throws: error
-  public static func updateRepo(at path: String, withBranch branch: String = "master") throws {
+  public static func updateRepo(at path: String,
+                                withBranch branch: String = "master") throws {
     // update the specified branch
     let remotes = try findRemotes(at: path)
     guard remotes.count > 0 else {
@@ -45,16 +49,44 @@ public struct SwiftGit {
     }
 
     let (status, _, err) = try SwiftPawn.execute(command: "git",
-                                                 arguments: ["git", "-C", path, "pull", remotes[0], branch])
+                                                 arguments:
+                                                 ["git", "-C", path, "pull",
+                                                  remotes[0], branch])
     if status != 0 {
       throw SwiftGitError.opFailed("Commit failed with message: \n\(err)")
+    }
+  }
+
+  public static func findTrackingRemote(at path: String,
+                                        branch: String) -> String? {
+    return run(inDir: path) {
+      guard isRepo(at: path) else {
+        return nil
+      }
+
+      do {
+        let (status, out, _)
+          = try SwiftPawn.execute(command: "git",
+                                  arguments:
+                                  ["git", "rev-parse", "--abbrev-ref",
+                                   "--symbolic-full-name", "\(branch)@{u}"])
+        if status != 0 {
+          return nil
+        }
+
+        let remote = out.trimmed()
+        return remote
+      } catch {
+        return nil
+      }
     }
   }
 
   public static func fetchRepo(at path: String) throws {
     try run(inDir: path) {
       let (status, _, err) = try SwiftPawn.execute(command: "git",
-                                                   arguments: ["git", "fetch", "--all"])
+                                                   arguments:
+                                                   ["git", "fetch", "--all"])
       if status != 0 {
         throw SwiftGitError.opFailed("Fetch failed with message: \n\(err)")
       }
@@ -68,8 +100,10 @@ public struct SwiftGit {
   ///   - path: local folder to hold the repository
   ///   - branch: branch to checkout, default to master
   /// - Throws: error
-  public static func cloneRepo(from repo: String, at path: String, withBranch _: String = "master") throws {
-    _ = try SwiftPawn.execute(command: "git", arguments: ["git", "clone", repo, path])
+  public static func cloneRepo(from repo: String, at path: String,
+                               withBranch _: String = "master") throws {
+    _ = try SwiftPawn.execute(command: "git",
+                              arguments: ["git", "clone", repo, path])
   }
 
   /// Find all remotes in the repository
@@ -79,11 +113,14 @@ public struct SwiftGit {
   /// - Throws: error
   public static func findRemotes(at path: String) throws -> [String] {
     return try run(inDir: path) {
-      let (status, out, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "remote"])
+      let (status, out, err) = try SwiftPawn.execute(command: "git",
+                                                     arguments:
+                                                     ["git", "remote"])
       if status != 0 {
         throw SwiftGitError.opFailed("Commit failed with message: \n\(err)")
       }
-      return out.split(separator: "\n").filter { !$0.isEmpty }.map { String($0) }
+      return out.split(separator: "\n")
+        .filter { !$0.isEmpty }.map { String($0) }
     }
   }
 
@@ -94,7 +131,9 @@ public struct SwiftGit {
   public static func commit(at path: String, withMessage msg: String) throws {
     try run(inDir: path) {
       let (status, _, err) = try SwiftPawn.execute(command: "git",
-                                                   arguments: ["git", "commit", "-m", "\"\(msg)\""])
+                                                   arguments:
+                                                   ["git", "commit", "-m",
+                                                    "\"\(msg)\""])
       if status != 0 {
         throw SwiftGitError.opFailed("Commit failed with message: \n\(err)")
       }
@@ -103,29 +142,42 @@ public struct SwiftGit {
 
   public static func add(_: String, at path: String) throws {
     try run(inDir: path) {
-      let (status, _, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "add", path])
+      let (status, _, err) = try SwiftPawn.execute(command: "git",
+                                                   arguments:
+                                                   ["git", "add", path])
       if status != 0 {
-        throw SwiftGitError.opFailed("Staging \(path) failed with message: \n\(err)")
+        throw SwiftGitError
+          .opFailed("Staging \(path) failed with message: \n\(err)")
       }
     }
   }
 
   public static func isModified(at path: String) throws -> Bool {
     return try run(inDir: path) {
-      let (status, out, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "status", "--porcelain"])
+      let (status, out, err) = try SwiftPawn.execute(command: "git",
+                                                     arguments:
+                                                     ["git",
+                                                      "status", "--porcelain"])
       if status != 0 {
-        throw SwiftGitError.opFailed("Staging \(path) failed with message: \n\(err)")
+        throw SwiftGitError
+          .opFailed("Staging \(path) failed with message: \n\(err)")
       }
-      return out.split(separator: "\n").filter { $0.split(separator: " ")[0].contains("M") }.count > 0
+      return out
+        .split(separator: "\n")
+        .filter { $0.split(separator: " ")[0].contains("M") }.count > 0
     }
   }
 
   public static func branchName(at path: String) throws -> String? {
     // TODO: support detached?
     return try run(inDir: path) {
-      let (status, out, err) = try SwiftPawn.execute(command: "git", arguments: ["git", "symbolic-ref", "HEAD"])
+      let (status, out, err) = try SwiftPawn.execute(command: "git",
+                                                     arguments:
+                                                     ["git",
+                                                      "symbolic-ref", "HEAD"])
       if status != 0 {
-        throw SwiftGitError.opFailed("Staging \(path) failed with message: \n\(err)")
+        throw SwiftGitError
+          .opFailed("Staging \(path) failed with message: \n\(err)")
       }
 
       guard out.starts(with: "refs/heads") else {
@@ -149,14 +201,18 @@ public struct SwiftGit {
   ///   - lhs: the label/hash indicating one commit that's ahead
   ///   - rhs: the label/hash indicating one commit that's behind
   ///   - path: directory where should be a git repository
-  /// - Returns: value indicate how many conmmits _lhs_ is ahead of _rhs_ (can be negative).
-  /// - Throws: execution error, or either of the parameter is not a valid commit
-  public static func compare(_ lhs: String, _ rhs: String, at path: String) throws -> Int {
+  /// - Returns: value indicate how many conmmits _lhs_ is ahead of _rhs_
+  /// - Throws: execution error
+  public static func compare(_ lhs: String, _ rhs: String,
+                             at path: String) throws -> Int {
     return try run(inDir: path) {
       var (status, out, err) = try SwiftPawn.execute(command: "git",
-                                                     arguments: ["git", "rev-list", "\(rhs)..\(lhs)"])
+                                                     arguments:
+                                                     ["git", "rev-list",
+                                                      "\(rhs)..\(lhs)"])
       guard status == 0 else {
-        throw SwiftGitError.opFailed("git rev-list \(rhs)..\(lhs) failed due to: \(err)")
+        throw SwiftGitError
+          .opFailed("git rev-list \(rhs)..\(lhs) failed due to: \(err)")
       }
 
       let l2r = out.trimmed().split(separator: "\n").count
@@ -165,9 +221,12 @@ public struct SwiftGit {
       }
 
       (status, out, err) = try SwiftPawn.execute(command: "git",
-                                                 arguments: ["git", "rev-list", "\(lhs)..\(rhs)"])
+                                                 arguments:
+                                                 ["git", "rev-list",
+                                                  "\(lhs)..\(rhs)"])
       guard status == 0 else {
-        throw SwiftGitError.opFailed("git rev-list \(lhs)..\(rhs) failed due to: \(err)")
+        throw SwiftGitError
+          .opFailed("git rev-list \(lhs)..\(rhs) failed due to: \(err)")
       }
 
       let r2l = out.trimmed().split(separator: "\n").count
@@ -178,7 +237,8 @@ public struct SwiftGit {
     }
   }
 
-  private static func run<R>(inDir dir: String, f: () throws -> R) rethrows -> R {
+  private static func run<R>(inDir dir: String,
+                             f: () throws -> R) rethrows -> R {
     var buffer = [Int8](repeating: 0, count: BufferSize)
     let cwd = String(cString: getcwd(&buffer, BufferSize))
     chdir(dir)
