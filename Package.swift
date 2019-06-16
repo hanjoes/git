@@ -10,7 +10,7 @@ let package = Package(
             targets: ["SwiftGitLib"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/hanjoes/swift-pawn", from: "1.0.0")
+        .package(url: "https://github.com/hanjoes/swift-pawn", from: "1.0.2")
     ],
     targets: [
         .target(
