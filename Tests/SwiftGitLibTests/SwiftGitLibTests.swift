@@ -11,7 +11,7 @@ private struct TC {
   static let TestRepo = "https://github.com/hanjoes/swift-git.git"
 }
 
-class GitRuntimeTests: XCTestCase {
+class SwiftGitLibTests: XCTestCase {
   func testCloneRepo() throws {
     let currentTemp = try makeTempDirectory()
     do {
@@ -90,4 +90,17 @@ class GitRuntimeTests: XCTestCase {
     mkdir(tempDirectoryPath, S_IRWXU)
     return tempDirectoryPath
   }
+
+  static var allTests = [
+    ("testCloneRepo", testCloneRepo),
+    ("testIsRepo", testIsRepo),
+    ("testFindRemoteButNoRepo", testFindRemoteButNoRepo),
+    ("testFindRemote", testFindRemote),
+    ("testInitialize", testInitialize),
+    ("testCommit", testCommit),
+    ("testIsModified", testIsModified),
+    ("testCompare", testCompare),
+    ("testBranchName", testBranchName),
+  ]
 }
+

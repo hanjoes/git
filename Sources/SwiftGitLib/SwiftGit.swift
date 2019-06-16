@@ -1,4 +1,9 @@
-import Darwin
+#if os(Linux)
+  import Glibc
+#else
+  import Darwin
+#endif
+
 import SwiftPawn
 
 /// Simple Git functionalities.
