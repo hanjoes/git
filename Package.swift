@@ -7,17 +7,20 @@ let package = Package(
     products: [
         .library(
             name: "SwiftGitLib",
-            targets: ["SwiftGitLib"]),
+            targets: ["SwiftGitLib"]
+        ),
     ],
     dependencies: [
-        .package(url: "https://github.com/hanjoes/swift-pawn", from: "1.0.2")
+        .package(url: "https://github.com/hanjoes/swift-pawn", from: "1.0.2"),
     ],
     targets: [
         .target(
-            name: "SwiftGitLib", 
-            dependencies: ["SwiftPawn"]),
+            name: "SwiftGitLib",
+            dependencies: ["SwiftPawn"]
+        ),
         .testTarget(
             name: "SwiftGitLibTests",
-            dependencies: ["SwiftGitLib"]),
+            dependencies: ["SwiftGitLib"]
+        ),
     ]
 )
