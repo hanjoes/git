@@ -1,6 +1,6 @@
-
-public enum SwiftGitError: Error {
-    case noRepo(String)
-    case opFailed(String)
-    case noRemote(String)
-}
+//
+// public enum SwiftGitError: Error {
+//    case noRepo(String)
+//    case opFailed(String)
+//    case noRemote(String)
+// }
