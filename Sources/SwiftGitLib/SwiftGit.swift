@@ -8,6 +8,7 @@ import SwiftPawn
 
 /// Common git functionalities.
 public struct SwiftGit {
+    
     private static let BufferSize = 4096
 
     private static var cwd: String {
@@ -31,7 +32,7 @@ public struct SwiftGit {
             let args = ["git", "status"]
             do {
                 let (status, _, err) = try SwiftPawn.execute(command: "git", arguments: args)
-                guard status != 0 else {
+                guard status == 0 else {
                     return (false, getErrorMessage(args, err))
                 }
                 return (status == 0, err)
@@ -213,6 +214,7 @@ public struct SwiftGit {
     ///     * __ret__: returns status, non-zero indicates error
     ///     * __out__: contains output message
     ///     * __err__: contains error message
+    @discardableResult
     public static func pull(at path: String, branch: String) -> (ret: Int, out: String, err: String) {
         guard isDir(path) else {
             return (-1, "", "Error: \(path) is not a directory")
@@ -251,6 +253,7 @@ public struct SwiftGit {
     ///     * __ret__: returns status, non-zero indicates error
     ///     * __out__: contains output message
     ///     * __err__: contains error message
+    @discardableResult
     public static func fetch(at path: String) -> (ret: Int, out: String, err: String) {
         guard isDir(path) else {
             return (-1, "", "Error: \(path) is not a directory")
@@ -279,6 +282,7 @@ public struct SwiftGit {
     ///     * __ret__: returns status, non-zero indicates error
     ///     * __out__: contains output message
     ///     * __err__: contains error message
+    @discardableResult
     public static func clone(from url: String, into path: String, branch _: String = "master") -> (ret: Int, out: String, err: String) {
         guard isDir(path) else {
             return (-1, "", "Error: \(path) is not a directory")
@@ -302,6 +306,7 @@ public struct SwiftGit {
     ///     * __ret__: returns status, non-zero indicates error
     ///     * __out__: contains output message
     ///     * __err__: contains error message
+    @discardableResult
     public static func initialize(at path: String) -> (ret: Int, out: String, err: String) {
         guard isDir(path) else {
             return (-1, "", "Error: \(path) is not a directory")
@@ -327,6 +332,7 @@ public struct SwiftGit {
     ///     * __ret__: returns status, non-zero indicates error
     ///     * __out__: contains output message
     ///     * __err__: contains error message
+    @discardableResult
     public static func commit(at path: String, message msg: String) -> (ret: Int, out: String, err: String) {
         guard isDir(path) else {
             return (-1, "", "Error: \(path) is not a directory")
@@ -353,6 +359,7 @@ public struct SwiftGit {
     ///     * __ret__: returns status, non-zero indicates error
     ///     * __out__: contains output message
     ///     * __err__: contains error message
+    @discardableResult
     public static func add(path: String) -> (ret: Int, out: String, err: String) {
         return run(inDir: path) {
             let args = ["git", "add", path]
@@ -383,7 +390,7 @@ extension SwiftGit {
         guard ret == 0 else {
             return false
         }
-        return pathStat.pointee.st_mode == S_IFDIR
+        return (pathStat.pointee.st_mode & S_IFDIR) != 0
     }
 
     private static func run<R>(inDir dir: String, f: () throws -> R) rethrows -> R {
