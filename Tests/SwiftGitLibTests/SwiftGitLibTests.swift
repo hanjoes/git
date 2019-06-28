@@ -92,7 +92,7 @@ class SwiftGitLibTests: XCTestCase {
     }
 
     static var allTests = [
-        // ("testCloneAndCheck", testCloneAndCheck),
+         ("testCloneAndCheck", testCloneAndCheck),
         ("testFindRemoteButNoRepo", testFindRemoteButNoRepo),
         ("testFindRemote", testFindRemote),
 //        ("testInitialize", testInitialize),
