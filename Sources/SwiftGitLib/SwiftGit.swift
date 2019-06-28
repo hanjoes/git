@@ -8,7 +8,6 @@ import SwiftPawn
 
 /// Common git functionalities.
 public struct SwiftGit {
-    
     private static let BufferSize = 4096
 
     private static var cwd: String {
