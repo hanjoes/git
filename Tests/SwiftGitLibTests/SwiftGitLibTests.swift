@@ -95,7 +95,7 @@ class SwiftGitLibTests: XCTestCase {
         // ("testCloneAndCheck", testCloneAndCheck),
         ("testFindRemoteButNoRepo", testFindRemoteButNoRepo),
         ("testFindRemote", testFindRemote),
-        ("testInitialize", testInitialize),
+//        ("testInitialize", testInitialize),
         ("testCommit", testCommit),
         ("testModified", testModified),
         ("testCompare", testCompare),

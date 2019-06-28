@@ -7,12 +7,12 @@ matrix:
     - os: osx
       osx_image: xcode10.2
       stage: main-test
-      language: Swift
     - os: linux
       dist: xenial
       install:
         - eval "$(curl -sL https://swiftenv.fuller.li/install.sh)"
-      language: Swift
 
 script:
+  - swift --version
+  - swift build
   - swift test
