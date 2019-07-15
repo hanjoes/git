@@ -15,7 +15,7 @@ public struct SwiftGit {
         return String(cString: getcwd(&buffer, BufferSize))
     }
 
-    // MARK: Probing
+    // MARK: - Probing
 
     /// Check whether the path is pointing to a git repository.
     ///
@@ -202,7 +202,7 @@ public struct SwiftGit {
         }
     }
 
-    // MARK: Side-effect
+    // MARK: - Side-effect
 
     /// Pull the latest changes for a remote branch tracked by _branch_ for repository at _path_.
     ///
